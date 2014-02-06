@@ -1,0 +1,60 @@
+#!/usr/bin/perl -w
+use strict;         # show warnings
+use LWP;						# Загружаем все нужные LWP классы, и удостовериваемся
+use HTTP::Cookies;
+#use pragma { no warnings; print ... };
+use utf8;
+#use open qw(:std :utf8);
+
+# линки на сайт и на скрипт (##NMB## - подставить номер маршрута)
+my $url0 = 'http://maps.nskgortrans.ru';
+my $url1 = 'http://maps.nskgortrans.ru/markers.php?l=1-##NMB##-W|';
+
+# получаем номер маршрута из параметров 
+my $number = shift;
+# die if no word in param
+die "Please, enter bus number\n" unless $number;
+# заменяем ##NMB## номером маршрута
+$url1 =~ s/##NMB##/$number/; 
+
+my $browser = LWP::UserAgent->new;
+$browser->cookie_jar({});
+my $response = $browser->get( $url0 );
+
+die "Can't get $url0 -- \n", $response->status_line
+	unless $response->is_success;
+
+if($response->content =~ m/$number/i) {
+	#print "OK\n";
+} else {
+  #print "response 0 fail\n";
+}
+
+my $response1 = $browser->get( $url1 );
+
+die "Can't get $url1 -- \n", $response1->status_line
+	unless $response1->is_success;
+
+if($response1->content =~ m/$number/i) {
+	#print "OK\n";
+} else {
+	print "response 1 fail\n";
+}
+my $content = $response1->content; # сохраняем полученые данные в переменную
+ #удаляем переносы строк, чтоб вести поиск по единой строке (в html они имеют место быть)
+$content =~ s/\n//g;
+#print "$content\n\n";
+# prepare array for results
+my @results = ();
+# parse page 
+while ($content =~ /<marker\s(.*?)\/>/ig) {
+	    # get matched value (between "<marker" and "/>")
+			    my $result = $1;
+					# push result string in result array
+					push @results, $result;
+}
+
+foreach my $result (@results) {
+	    print $result."\n";
+} 
+

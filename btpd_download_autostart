@@ -1,0 +1,29 @@
+#! /usr/bin/perl -w
+use strict;
+
+############ config section ############
+#dir for save downloaded files
+my $wait_for_torrents_dir = $ARGV[0];
+my $saved_files_dir = $ARGV[1];
+########################################
+#print "check " , $wait_for_torrents_dir, "\n";
+
+my @new_torrents_list = `ls $wait_for_torrents_dir/*.torrent 2>/dev/null`;
+chomp @new_torrents_list;
+
+foreach (@new_torrents_list){
+	print "Found new torrent: ", $_, "\n";
+	my @torrent_info = `btinfo $_`;
+	chomp @torrent_info;
+	my $dirname;
+	foreach (@torrent_info) {
+		if ($_=~m/^Name:\s(.+)/) {
+			print $1, "\n";
+			$dirname = $1;
+		}
+	}
+#	my $path = $saved_files_dir . "/" . $dirname;
+	print `btcli add \"$_\" -d \"$dirname\" && rm \"$_\" -rf`;
+	
+}
+

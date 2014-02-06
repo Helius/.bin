@@ -1,0 +1,7 @@
+#!/bin/bash
+
+vTime="`date`"
+#echo $vTime
+vSpeechStr=$"Время "${vTime:11:2}", "${vTime:14:2}.
+echo "$vSpeechStr"
+

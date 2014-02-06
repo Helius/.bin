@@ -1,0 +1,37 @@
+#!/bin/bash
+# скрипт для создания бэкапов хранящихся заданный период
+
+# set amount of old backup in the backup directory
+COL=10
+
+
+
+
+
+# check input params
+if [ -z "$1" ] && [ -z "$2" ]; then
+	echo "usage: $0 <dir what we backuping> <dir where backups hold>"
+	exit 1;
+fi
+
+
+DATE=`date +%d-%m-%Y--%s`
+BACKUPDIR="$2"
+MY_LOG="/home/eugene/log/backup.log"
+BACKUPNAME=`basename "$1"`
+
+echo "do_backup: $DATE from $1 to $2" >> $MY_LOG
+
+tar -pzcf "$BACKUPDIR/$BACKUPNAME"-$DATE.tar.gz "$1" --ignore-failed-read >> $MY_LOG 2>&1
+
+# удаляем бэкапы страрше чем X штук
+for FIL in `ls -t $BACKUPDIR/"$BACKUPNAME"-*.tar.gz` ;
+do
+	let "COUNT1=$COUNT1 + 1";
+		if [ -e "$FIL" ] && [ "$COUNT1" -gt "$COL" ] ; then
+            # Очередной файл существует и при этом кол-во файлов уже больше $COL
+            # Тут надо удалять каждый файл пока условие верно.
+            rm -f $FIL >> $MY_LOG 2>&1
+            wait;
+		fi
+done

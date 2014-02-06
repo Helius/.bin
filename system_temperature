@@ -1,0 +1,35 @@
+#!/bin/bash
+
+MB_T_RAW=`sensors | egrep -o 'temp1:\s+\+[0-9]+' | egrep -o '\+[0-9]+' | egrep -o '[0-9]+'`
+CORE_0_RAW=`sensors | egrep -o 'Core 0:\s+\+[0-9]+' | egrep -o '\+[0-9]+' | egrep -o '[0-9]+'`
+CORE_1_RAW=`sensors | egrep -o 'Core 1:\s+\+[0-9]+' | egrep -o '\+[0-9]+' | egrep -o '[0-9]+'`
+MB_T=$(( MB_T_RAW - 23 ))
+CORE_0=$(( CORE_0_RAW - 23 ))
+CORE_1=$(( CORE_1_RAW - 23 ))
+SDA_T=`/usr/sbin/hddtemp /dev/sda | egrep -o '[0-9]+°C' | egrep -o [0-9]+`
+SDB_T=`/usr/sbin/hddtemp /dev/sdb | egrep -o '[0-9]+°C' | egrep -o [0-9]+`
+CPU_USAGE=`/home/eugene/.bin/cpu_load.sh`
+
+#echo "`date -R`, MB:$MB_T, CORE0:$CORE_0, CORE1:$CORE_1, SDA:$SDA_T, SDB:$SDB_T, CPULOAD:$CPU_USAGE"
+
+#update rrd data base
+rrdtool update /home/eugene/db/tmp.rrd `date +"%s"`:$MB_T:$CORE_0:$CORE_1:$SDA_T:$SDB_T:$CPU_USAGE
+
+#echo -ne "#54:55:58:10:00:20\n#54:55:58:10:00:21#""$MB_T""\n#54:55:58:10:00:22#""$CORE_0""\n#54:55:58:10:00:23#""$CORE_1""\n#54:55:58:10:00:24#""$SDA_T""\n#54:55:58:10:00:25#""$SDB_T""\n#54:55:58:10:00:26#""$CPU_USAGE""\n##" | nc narodmon.ru 8283
+
+#cpu0_tempr
+#cpu1_tempr
+#cpu_load
+#indoor_tempr
+#mac
+#mb_tempr
+#sda_tempr
+#sdb_tempr
+
+#set value to narodmon.data for narodmon_sender
+echo "$MB_T" >   /home/eugene/.narodmon.data/atom/mb_tempr/value
+echo "$CORE_0" > /home/eugene/.narodmon.data/atom/cpu0_tempr/value
+echo "$CORE_1" > /home/eugene/.narodmon.data/atom/cpu1_tempr/value
+echo "$SDA_T" > /home/eugene/.narodmon.data/atom/sda_tempr/value
+echo "$SDB_T" > /home/eugene/.narodmon.data/atom/sdb_tempr/value
+echo "$CPU_USAGE" > /home/eugene/.narodmon.data/atom/cpu_load/value

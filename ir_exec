@@ -1,0 +1,207 @@
+#!/bin/bash
+
+MYBIN="/home/eugene/.bin"
+MYSND="/home/eugene/sound"
+WAIT_SPEC_CMD=""
+DIGIT_STR=""
+#echo "ir_exec started..."
+#aplay $MYSND/beep-02.wav > /dev/null
+
+#nc -U /var/run/lirc/lircd | while read line; do
+cat /dev/ttyUSB0 | while read line; do
+#    echo "read: [$line]"
+		CMD=`echo $line | grep -o '[_!.A-Z0-9]*'`
+		echo "$CMD"
+
+#		if [ -n "`amixer get Master | grep 'Mono' | egrep -o '\[off\]'`" ] ; then
+#				amixer set Master on > /dev/null
+#				aplay $MYSND/beep-02.wav > /dev/null
+#				sleep 1
+#				amixer set Master off > /dev/null
+#		else 
+#				aplay $MYSND/beep_base.wav > /dev/null
+#		fi
+
+
+		case "$CMD" in
+# volume control
+			("VOLUME_UP")	
+				amixer set Master 2+ > /dev/null
+			;;
+			("VOLUME_DOWN")
+				amixer set Master 2- > /dev/null
+			;;
+			(POWER)	
+				if [ -n "`amixer get Master | grep 'Mono' | egrep -o '\[on\]'`" ] ; then
+					if [ -n "`$MYBIN/lastfm status`" ] ; then
+						$MYBIN/lastfm stop
+					fi
+					aplay $MYSND/beep-02.wav > /dev/null
+					amixer set Master off > /dev/null
+				else 
+					amixer set Master on > /dev/null
+					aplay $MYSND/beep_base.wav > /dev/null
+				fi
+			;;
+# start/stop lastfm
+			("AUDIO")
+				if [ -n "`$MYBIN/lastfm status`" ] ; then
+					echo "stop lastfm"
+					$MYBIN/lastfm stop
+				else
+					echo "start lastfm"
+					$MYBIN/lastfm start
+					if [ -n "`amixer get Master | grep 'Mono' | egrep -o '\[on\]'`" ] ; then
+					amixer set Master on > /dev/null
+					fi
+				fi
+			;;
+#			(KEY_PAUSE)
+#				echo "not implemented yet"
+#			;;
+#			(KEY_PLAY)
+#				echo "not implemented yet"
+#			;;
+# next lastfm track
+			("FORWARD")
+				if [ -n "`$MYBIN/lastfm status`" ] ; then
+					$MYBIN/lastfm next
+				fi
+			;;
+# bann lastfm track
+			("RANDOM")
+				if [ -n "`$MYBIN/lastfm status`" ] ; then
+					$MYBIN/lastfm ban
+				fi
+			;;
+# love lastfm track
+			("REPEAT")
+				if [ -n "`$MYBIN/lastfm status`" ] ; then
+					$MYBIN/lastfm love
+				fi
+			;;
+# next lastfm radio from history
+			("BACKWARD")
+				if [ -n "`$MYBIN/lastfm status`" ] ; then
+					$MYBIN/lastfm next_radio
+				fi
+			;;
+# weather today
+			("1")
+				$MYBIN/get_ngs_today | $MYBIN/sayit
+			;;
+# weather tommorow
+			("2")
+				$MYBIN/get_yandex_prognoz | $MYBIN/sayit
+			;;
+## check if digit
+#			(KEY_1 | KEY_2 | KEY_3 | KEY_4 | KEY_5 | KEY_6 | KEY_7 | KEY_8 | KEY_9 | KEY_0)
+#			echo Digit
+#			#-----------------------------------------------
+#			if [[ $WAIT_SPEC_CMD == "" ]] ; then
+#				echo normal_digit
+#				case "$CMD" in
+#				#-----
+#				(KEY_1)
+#				# today prognoz
+#				$MYBIN/get_ngs_today | $MYBIN/sayit
+#				;;
+#				#-----
+#				(KEY_2)
+#				# tomorrow prognoz
+#				$MYBIN/get_yandex_prognoz | $MYBIN/sayit
+#				;;
+#				#-----
+#				(*)
+#					echo "not implemented yet"
+#				#	aplay $MYSND/beep_base.wav > /dev/null
+#				;;
+#				esac
+#			#-----------------------------------------------
+#			elif [[ $WAIT_SPEC_CMD == "alarm_time" ]]	; then
+#				echo wait_digit_input
+#				case "$CMD" in
+#				(KEY_1)
+#					DIG="1"
+#				;;
+#				(KEY_2)
+#					DIG="2"
+#				;;
+#				(KEY_3)
+#					DIG="3"
+#				;;
+#				(KEY_4)
+#					DIG="4"
+#				;;
+#				(KEY_5)
+#					DIG="5"
+#				;;
+#				(KEY_6)
+#					DIG="6"
+#				;;
+#				(KEY_7)
+#					DIG="7"
+#				;;
+#				(KEY_8)
+#					DIG="8"
+#				;;
+#				(KEY_9)
+#					DIG="9"
+#				;;
+#				(KEY_0)
+#					DIG="0"
+#				;;
+#				(*)
+#					aplay $MYSND/eto_ne_chislo.wav > /dev/null
+#				;;
+#
+#				esac
+#				DIGIT_STR=$DIGIT_STR"$DIG"
+#				echo "$DIGIT_STR"
+#			fi
+#			#-----------------------------------------------
+#			;;
+# mail report
+			("SEARCH")
+				$MYBIN/mail_report | $MYBIN/sayit
+			;;
+# say time
+			("CLOCK")
+				$MYBIN/get_time_str | $MYBIN/sayit
+			;;
+# say sys info
+			("DISPLAY")
+			HDD_TEMP=`$MYBIN/get_hdd_tmpr`
+				echo "Температура винчестера $HDD_TEMP градусов" | $MYBIN/sayit
+			;;
+## spetial key
+#			(KEY_SETUP)
+#			aplay $MYSND/Vvedite_vremya_taimera.wav > /dev/null
+#			WAIT_SPEC_CMD="alarm_time"
+#			;;
+#			(KEY_ENTER)
+#			if [ -n "$DIGIT_STR" ] ; then
+#				aplay $MYSND/Prinyato.wav > /dev/null
+#				echo "Таймер установлен на $DIGIT_STR минут" | /home/eugene/.bin/sayit
+#				$MYBIN/timer $DIGIT_STR "aplay $MYSND/old_phone.wav" &
+#				WAIT_SPEC_CMD=""
+#				DIGIT_STR=""
+#			else
+#				aplay $MYSND/VvediteChislo.wav > /dev/null
+#			fi
+#			;;
+#			(KEY_CLEAR)
+#			if [ -n "$WAIT_SPEC_CMD" ] ; then
+#				aplay $MYSND/Operacia_otmenena.wav  > /dev/null
+#			fi
+#			WAIT_SPEC_CMD=""
+#			DIGIT_STR=""
+#			;;
+			(*)
+				echo "[$CMD] not found"
+#				aplay $MYSND/beep_base.wav > /dev/null
+			;;
+
+		esac
+done
+

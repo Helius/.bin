@@ -1,0 +1,12 @@
+#! /bin/bash
+# говорит о кол-ве непрочитанных писем или об их отсутсвии если их нет
+
+Nmb=`cat /home/eugene/.mail_count`
+
+if (( $Nmb > 1 )) ; then
+	echo "$Nmb писем" | /home/eugene/.bin/sayit
+elif (( $Nmb == 1 )) ; then
+	echo "Одно письмо" | /home/eugene/.bin/sayit
+else 
+	echo "Писем нет" | /home/eugene/.bin/sayit
+fi

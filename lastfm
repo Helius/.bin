@@ -1,0 +1,77 @@
+#!/bin/bash
+#
+PREFIX=/usr
+SHELLFM="/home/eugene/.shell-fm"
+case "$1" in
+   (start)
+			CUR_RADIO=`cat $SHELLFM/current_radio_nmb`
+			RADIO=`cat $SHELLFM/radio-list | head -n$CUR_RADIO | tail -n1`
+      echo "Starting radio $RADIO"
+      shell-fm -d $RADIO
+      ;;
+   (stop)
+      #echo "Stopping lastfm player (shell-fm)"
+      start-stop-daemon --stop --quiet --exec $PREFIX/bin/shell-fm >/dev/null
+      ;;
+   (status)
+	 if [ -n "`top -bn1 | grep shell-fm`" ] ; then
+		 echo run
+	 #else
+		 #echo stop
+	 fi
+      ;;
+   (info)
+	 if [ -n "`top -bn1 | grep shell-fm`" ] ; then
+			echo "`cat $SHELLFM/info`"
+			CUR_RADIO=`cat $SHELLFM/current_radio_nmb`
+			RADIO=`cat $SHELLFM/radio-list | head -n$CUR_RADIO | tail -n1`
+			echo "radio: $RADIO"
+	 fi
+      ;;
+   (next)
+			#echo "next track"
+			echo "skip" | nc 127.0.0.1 54311
+      ;;
+   (radio)
+			#echo "play given radio"
+			echo "play $2" | nc 127.0.0.1 54311
+      ;;
+   (next_radio)
+			#echo "next radio"
+			RADIO_CNT=`cat $SHELLFM/radio-list | wc -l`
+			#echo "count $RADIO_CNT"
+			CUR_RADIO=`cat $SHELLFM/current_radio_nmb`
+			#echo "current $CUR_RADIO"
+			RADIO_IND=1
+			if [[ CUR_RADIO -eq RADIO_CNT ]] ; then
+				#echo "end of list"
+				RADIO_IND=1
+			else
+				#echo "calc new"
+				let RADIO_IND=$((CUR_RADIO+1))
+			fi
+			#echo "new index $RADIO_IND"
+			RADIO=`cat $SHELLFM/radio-list | head -n$RADIO_IND | tail -n1`
+			echo $RADIO_IND > $SHELLFM/current_radio_nmb
+			#echo "new radio $RADIO"
+			echo "play $RADIO" | nc 127.0.0.1 54311
+      ;;
+   (pause)
+			#echo pause/play"
+			echo "pause" | nc 127.0.0.1 54311
+      ;;
+   (ban)
+			echo "ban track"
+			echo "ban" | nc 127.0.0.1 54311
+      ;;
+   (love)
+			echo "love track"
+			echo "love" | nc 127.0.0.1 54311
+      ;;
+   (*)
+      echo $0 "start[?url] | stop | status | info | next | radio[?url] | next_radio | ban | love | pause"
+      exit 1
+      ;;
+esac
+exit 0
+

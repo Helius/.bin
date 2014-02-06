@@ -1,0 +1,3 @@
+#!/bin/bash
+datestr=`date +%u`
+echo `/home/eugene/.bin/day_of_week $datestr`

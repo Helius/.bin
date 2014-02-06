@@ -1,0 +1,6 @@
+#!/bin/bash
+# проигрывает случайный файл из дирректории с музыкой
+FILE_NAME=`find /data/Music/ | grep '.\.mp3$' | shuf | head -1`  
+echo `date` $FILE_NAME >> /home/eugene/log/morning_play_list.log
+mocp -l "$FILE_NAME"
+

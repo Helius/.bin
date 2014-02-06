@@ -1,0 +1,46 @@
+#!/bin/bash
+
+read str <&0
+#echo "$str"
+#проверяем запущен ли плеер
+MOCP_PLAY=`mocp -i | grep -o 'PLAY'`
+LASTFM=`/home/eugene/.bin/lastfm status`
+#echo "lastfm status: $LASTFM"
+VOLUME=`amixer get Master | grep Mono: | egrep -oe '\ [0-9]+\ '`
+#echo "curent VOLUME: $VOLUME"
+
+#ставим плеер на паузу
+if [ -n "$MOCP_PLAY" ] 
+then
+/usr/bin/mocp -P
+fi
+
+
+#ставим плеер на паузу
+#if [ -n "$LASTFM" ] 
+#then
+#	/home/eugene/.bin/lastfm stop
+#fi
+
+
+#устанавливаем громкость
+amixer -c 0 -- sset Master playback 40 > /dev/null
+
+#запускаем синтезатор
+#echo "$str" | festival --tts --language russian > /dev/null
+echo "$str" | festival_client --ttw | aplay
+
+#возвращаем громкость на прежний уровень
+amixer -c 0 -- sset Master playback $VOLUME > /dev/null
+
+if [ -n "$MOCP_PLAY" ]
+then
+#снимаем паузу
+/usr/bin/mocp -U
+fi
+
+#снимаем на паузу
+#if [ -n "$LASTFM" ] 
+#then
+#	/home/eugene/.bin/lastfm start
+#fi
