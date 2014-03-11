@@ -1,1 +1,1 @@
-/usr/bin/make
+/home/eugene/.bin/colormake

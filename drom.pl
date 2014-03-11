@@ -8,6 +8,7 @@ use MIME::Lite;
 
 ################# config section ###################
 my $car_old_file='/home/eugene/.car.old';
+my $email='ghelius@gmail.com'
 ####################################################
 
 
@@ -136,9 +137,7 @@ foreach (@carlist) {
 			print " Body: [", $mail_body, "]\n";
 			my $msg = MIME::Lite->new (
 				 From =>'Notify daemon <mail@ghelius.com>',
-				 #To =>'ryabov.artyom@mail.ru',
-				 To =>'ghelius@gmail.com',
-				 #To =>'helius@bk.ru',
+				 To =>$email,
 				 Subject =>$name . "," . $year . "," . $price,
 				 Type    =>'text/plain; charset=UTF-8',
 				 Data =>$checked_car
