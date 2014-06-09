@@ -13,7 +13,7 @@ chomp @new_torrents_list;
 
 foreach (@new_torrents_list){
 	print "Found new torrent: ", $_, "\n";
-	my @torrent_info = `btinfo $_`;
+	my @torrent_info = `btinfo \"$_\"`;
 	chomp @torrent_info;
 	my $dirname;
 	foreach (@torrent_info) {
@@ -22,7 +22,7 @@ foreach (@new_torrents_list){
 			$dirname = $1;
 		}
 	}
-#	my $path = $saved_files_dir . "/" . $dirname;
+	$dirname=~s/[^\w\s]/_/;
 	print `btcli add \"$_\" -d \"$dirname\" && rm \"$_\" -rf`;
 	
 }

@@ -78,7 +78,7 @@ rrdtool update /home/eugene/db/climatc.rrd `date +"%s"`:$TpvFixPoint:$TspFixPoin
 rrdtool graph /var/www/rrd_graph/climat_t.png \
 	--vertical-label C \
 	-e now \
-	-s 'end - 12 hours' \
+	-s 'end - 24 hours' \
 	-S 90 \
 	--title "Room temperature (12h)" \
 	--vertical-label "C" \
@@ -101,7 +101,7 @@ rrdtool graph /var/www/rrd_graph/climat_t.png \
 rrdtool graph /var/www/rrd_graph/climat_w.png \
 	--vertical-label C \
 	-e now \
-	-s 'end - 12 hours' \
+	-s 'end - 24 hours' \
 	-S 90 \
 	--title "Window gap (12h)" \
 	--vertical-label "%" \
@@ -126,7 +126,7 @@ rrdtool graph /var/www/rrd_graph/climat_w.png \
 rrdtool graph /var/www/rrd_graph/climat_t_48.png \
 	--vertical-label C \
 	-e now \
-	-s 'end - 48 hours' \
+	-s 'end - 96 hours' \
 	-S 300 \
 	--title "Room temperature (48h)" \
 	--vertical-label "C" \
@@ -149,7 +149,7 @@ rrdtool graph /var/www/rrd_graph/climat_t_48.png \
 rrdtool graph /var/www/rrd_graph/climat_w_48.png \
 	--vertical-label C \
 	-e now \
-	-s 'end - 48 hours' \
+	-s 'end - 96 hours' \
 	-S 300 \
 	--title "Window gap (48h)" \
 	--vertical-label "%" \
